@@ -1,0 +1,73 @@
+import("//tools/grit/grit_rule.gni")
+import("//third_party/brotli/brotli.gni")
+import("//third_party/inspector_protocol/inspector_protocol.gni")
+
+compressed_protocol_file =
+    "$root_gen_dir/wings/web/protocol.json.bro"
+
+compress_file_brotli("compressed_protocol_json") {
+  input_file = "$root_gen_dir/blink/core/inspector/protocol.json"
+  output_file = compressed_protocol_file
+  deps = [
+    "//third_party/WebKit/Source/core/inspector:protocol_version",
+  ]
+}    
+
+grit("wings_web_resources") {
+  source = "$root_gen_dir/wings/web/wings_web_resources.grd"
+  source_is_generated = true
+
+  outputs = [
+    "grit/wings_web_resources.h",
+    "wings_web_resources.pak",
+    "grit/wings_web_resources_map.cc",
+    "grit/wings_web_resources_map.h",
+  ]
+
+  grit_flags = [
+    "-E",
+    "compressed_protocol_file=" +
+        rebase_path(compressed_protocol_file, root_build_dir),
+  ]  
+
+  defines =
+      [ "SHARED_INTERMEDIATE_DIR=" + rebase_path(root_gen_dir, root_build_dir) ]  
+
+  deps = [
+    ":compressed_protocol_json",
+    ":generate_wings_web_grd",
+  ]      
+}
+
+resources_out_dir = "$root_out_dir/resources/wings/web"
+
+action("generate_wings_web_grd") {
+  script = "scripts/build/generate_wings_web_grd.py"
+
+  grd_files = [
+    "dist/index.html",
+    "dist/static/js/app.js",
+    "dist/static/js/manifest.js",
+    "dist/static/js/vendor.js",
+    "dist/static/css/app.css",
+  ]
+  inputs = grd_files
+  outfile = "$root_gen_dir/wings/web/wings_web_resources.grd"
+  outputs = [
+    outfile,
+  ]
+
+  relative_path_dirs = [
+    resources_out_dir,
+    "dist"
+  ]
+
+  args = rebase_path(grd_files, root_build_dir) + [ "--relative_path_dirs" ] +
+         rebase_path(relative_path_dirs, root_build_dir) +
+         [
+           "--images",
+           rebase_path("src/assets/images", root_build_dir),         
+           "--output",
+           rebase_path(outfile, root_build_dir),
+         ]
+}

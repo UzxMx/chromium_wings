@@ -1,0 +1,375 @@
+import("//build/config/features.gni")
+import("//build/config/sanitizers/sanitizers.gni")
+import("//build/config/ui.gni")
+import("//build/config/win/console_app.gni")
+import("//build/config/win/manifest.gni")
+import("//media/media_options.gni")
+import("//mojo/public/tools/bindings/mojom.gni")
+import("//ppapi/features/features.gni")
+import("//services/service_manager/public/service_manifest.gni")
+import("//tools/grit/grit_rule.gni")
+import("//tools/grit/repack.gni")
+import("//tools/v8_context_snapshot/v8_context_snapshot.gni")
+if (is_android) {
+  import("//build/config/android/config.gni")
+} else if (is_mac) {
+  import("//build/config/mac/rules.gni")
+  import("//build/mac/tweak_info_plist.gni")
+  import("//third_party/icu/config.gni")
+  import("//v8/gni/v8.gni")
+} else if (is_win) {
+  import("//build/win/syzygy/syzygy.gni")
+}
+
+declare_args() {
+  wings_product_name = "Wings"
+  wings_version = "1.0.0.0"
+}
+
+static_library("wings_lib") {
+  sources = [
+    "app/wings_main_delegate.h",
+    "app/wings_main_delegate.cc",
+    "app/paths_mac.h",
+    "app/paths_mac.mm",
+    "browser/wings.h",
+    "browser/wings.cc",
+    "browser/wings_mac.mm",
+    "browser/wings_application_mac.h",
+    "browser/wings_application_mac.mm",
+    "browser/wings_browser_context.h",
+    "browser/wings_browser_context.cc",
+    "browser/wings_browser_main.h",
+    "browser/wings_browser_main.cc",
+    "browser/wings_browser_main_parts.h",
+    "browser/wings_browser_main_parts.cc",
+    "browser/wings_browser_main_parts_mac.mm",
+    "browser/wings_content_browser_client.h",
+    "browser/wings_content_browser_client.cc",
+    "browser/wings_url_request_context_getter.h",
+    "browser/wings_url_request_context_getter.cc",
+    "browser/wings_permission_manager.h",
+    "browser/wings_permission_manager.cc",
+    "browser/wings_web_contents_view_delegate.h",
+    "browser/wings_web_contents_view_delegate_creator.h",
+    "browser/wings_web_contents_view_delegate_mac.mm",
+    "browser/wings_devtools_bindings.h",
+    "browser/wings_devtools_bindings.cc",
+    "browser/wings_devtools_frontend.h",
+    "browser/wings_devtools_frontend.cc",    
+    "browser/wings_devtools_manager_delegate.h",    
+    "browser/wings_devtools_manager_delegate.cc",    
+    "browser/renderer_host/wings_render_widget_host_view_mac_delegate.h",
+    "browser/renderer_host/wings_render_widget_host_view_mac_delegate.mm",
+    "browser/wings_network_delegate.h",
+    "browser/wings_network_delegate.cc",
+    "browser/wings_web_http_handler.h",
+    "browser/wings_web_http_handler.cc",
+    "browser/wings_web_manager.h",
+    "browser/wings_web_manager.cc",
+    "browser/wings_web_socket_factory.h",
+    "browser/wings_web_frontend.h",
+    "browser/wings_web_frontend.cc",
+    "browser/wings_web_frontend_host.h",
+    "browser/wings_web_frontend_host.cc",
+    "browser/wings_web_bindings.h",
+    "browser/wings_web_bindings.cc",
+    "common/wings_content_client.h",
+    "common/wings_content_client.cc",
+    "renderer/wings_content_renderer_client.h",
+    "renderer/wings_content_renderer_client.cc"
+  ]
+
+  public_deps = [
+    # This exposes all public content APIs.
+    "//content/public/app:both",
+    "//content/public/browser",
+    "//content/public/child",
+    "//content/public/common",
+    "//content/public/gpu",
+    "//content/public/renderer",
+    "//content/public/utility",
+    "//ipc",
+    "//services/network:network_service",
+  ]
+  deps = [
+    "//base",
+    "//base:base_static",
+    "//base/third_party/dynamic_annotations",
+    "//cc",
+    "//components/cdm/renderer",
+    "//components/crash/content/app",
+    "//components/crash/content/browser",
+    "//components/crash/core/common:crash_key",
+    "//components/keyed_service/content",
+    "//components/network_session_configurator/browser",
+    "//components/plugins/renderer",
+    "//components/url_formatter",
+    "//components/web_cache/renderer",
+    "//content:resources",
+    "//content/app/resources",
+    "//content/app/strings",
+    "//content/public/common",
+    "//content/public/common:service_names",
+    "//content/test:content_test_mojo_bindings",
+    "//device/bluetooth",
+    "//device/bluetooth:fake_bluetooth",
+    "//device/sensors/public/cpp:full",
+    "//gin",
+    "//gpu",
+    "//media",
+    "//media/capture",
+    "//media/mojo:features",
+    "//net",
+    "//net:net_resources",
+    "//net:http_server",
+    "//ppapi/features",
+    "//sandbox",
+    "//services/device/public/interfaces",
+    "//services/network/public/cpp",
+    "//services/service_manager/public/cpp",
+    "//services/test/echo:lib",
+    "//services/test/echo/public/interfaces",
+    "//skia",
+    "//storage/browser",
+    "//third_party/WebKit/public:blink",
+    "//third_party/WebKit/public:features",
+    "//third_party/WebKit/public:image_resources",
+    "//third_party/WebKit/public:resources",
+    "//third_party/icu",
+    "//ui/base",
+    "//ui/base/ime",
+    "//ui/display",
+    "//ui/events:events_base",
+    "//ui/gfx",
+    "//ui/gfx/geometry",
+    "//ui/gfx/ipc",
+    "//ui/gfx/ipc/geometry",
+    "//ui/gfx/ipc/skia",
+    "//ui/gl",
+    "//url",
+    "//v8",
+    "//wings/web:wings_web_resources",
+  ]
+
+  defines = [ "WINGS_VERSION=\"$wings_version\"" ]
+}
+
+if (is_mac) {
+  tweak_info_plist("wings_plist") {
+    info_plist = "app/app-Info.plist"
+    args = [
+      "--scm=1",
+      "--version",
+      wings_version
+    ]
+  }
+
+  mac_app_bundle("wings") {
+    output_name = wings_product_name
+
+    sources = [
+      "app/wings_main.cc"
+    ]
+
+    deps = [":wings_framework_bundle_data"]
+
+    ldflags = [
+      # The main app is at Wings.app/Contents/MacOS/Wings
+      # so set the rpath up to Contents/ so that the loader can find
+      # Framworks/.
+      "-rpath",
+      "@executable_path/../",
+    ]
+    info_plist_target = ":wings_plist"
+    data_deps = [
+      ":wings_lib"
+    ]    
+  }  
+}
+
+if (is_mac) {
+
+  wings_framework_name = "$wings_product_name Framework"
+
+  tweak_info_plist("wings_framework_plist") {
+    info_plist = "app/framework-Info.plist"
+    args = [
+      "--breakpad=0",
+      "--keystone=0",
+      "--scm=1",
+      "--version",
+      wings_version,
+      "--branding",
+      wings_product_name,
+    ]
+  }
+
+  mac_framework_bundle("wings_framework") {
+    output_name = wings_framework_name
+
+    sources = [
+      "app/wings_content_main.h",
+      "app/wings_content_main.cc"
+    ]
+
+    public_deps = [
+      ":wings_lib",
+    ]
+    deps = [
+      ":wings_framework_resources",
+      "//third_party/icu:icudata",
+    ]
+
+    ldflags = [
+      "-Wl,-install_name,@rpath/Frameworks/$output_name.framework/$output_name",
+    ]
+
+    if (is_component_build) {
+      # Set up the rpath for the framework so that it can find dylibs in the
+      # root output directory. The framework is at
+      # Wings.app/Contents/Frameworks/Wings Framework.framework/Wings Framework
+      # so use loader_path to go back to the root output directory.
+      ldflags += [
+        "-rpath",
+        "@loader_path/../../../..",
+      ]
+    }    
+
+    info_plist_target = ":wings_framework_plist"
+  }
+
+  bundle_data("wings_framework_resources") {
+    sources = [
+      "$root_out_dir/wings.pak",
+    ]
+
+    public_deps = [
+      ":pak",
+    ]
+
+    if (icu_use_data_file) {
+      sources += [ "$root_out_dir/icudtl.dat" ]
+      deps = [
+        "//third_party/icu:icudata",
+      ]
+    }
+
+    if (v8_use_external_startup_data) {
+      sources += [ "$root_out_dir/natives_blob.bin" ]
+      public_deps += [ "//v8" ]
+      if (use_v8_context_snapshot) {
+        sources += [ "$root_out_dir/v8_context_snapshot.bin" ]
+        public_deps += [ "//tools/v8_context_snapshot" ]
+      } else {
+        sources += [ "$root_out_dir/snapshot_blob.bin" ]
+      }
+    }
+
+    outputs = [
+      "{{bundle_resources_dir}}/{{source_file_part}}",
+    ]
+  }
+
+  bundle_data("wings_framework_bundle_data") {
+    sources = [
+      "$root_out_dir/$wings_framework_name.framework"
+    ]
+    outputs = [
+      "{{bundle_contents_dir}}/Frameworks/{{source_file_part}}",
+    ]
+    public_deps = [
+      ":wings_framework+link"
+    ]    
+  }   
+}
+
+service_manifest("wings_packaged_services_manifest_overlay") {
+  source = "//wings/browser/wings_packaged_services_manifest_overlay.json"
+  packaged_services = [ "//services/test/echo:manifest" ]
+}
+
+grit("content_wings_resources_grit") {
+  # External code should depend on ":resources" instead.
+  visibility = [ ":*" ]
+  source = "wings_resources.grd"
+  outputs = [
+    "grit/wings_resources.h",
+    "wings_resources.pak",
+  ]
+
+  # Mojo manifest overlays are generated.
+  source_is_generated = true
+  grit_flags = [
+    "-E",
+    "root_gen_dir=" + rebase_path(root_gen_dir, root_build_dir),
+  ]
+  deps = [
+    ":wings_packaged_services_manifest_overlay",
+  ]
+}
+
+copy("copy_wings_resources") {
+  sources = [
+    "$target_gen_dir/wings_resources.pak",
+  ]
+  outputs = [
+    "$root_out_dir/wings_resources.pak",
+  ]
+
+  public_deps = [
+    ":content_wings_resources_grit",
+  ]
+}
+
+group("resources") {
+  public_deps = [
+    ":copy_wings_resources",
+  ]
+}
+
+repack("pak") {
+  sources = [
+    "$root_gen_dir/blink/public/resources/blink_resources.pak",
+    "$root_gen_dir/blink/public/resources/blink_scaled_resources_100_percent.pak",
+    "$root_gen_dir/content/app/resources/content_resources_100_percent.pak",
+    "$root_gen_dir/content/app/strings/content_strings_en-US.pak",
+    "$root_gen_dir/content/browser/tracing/tracing_resources.pak",
+    "$root_gen_dir/content/content_resources.pak",
+    "$root_gen_dir/wings/wings_resources.pak",
+    "$root_gen_dir/mojo/public/js/mojo_bindings_resources.pak",
+    "$root_gen_dir/net/net_resources.pak",
+    "$root_gen_dir/ui/resources/ui_resources_100_percent.pak",
+    "$root_gen_dir/ui/resources/webui_resources.pak",
+    "$root_gen_dir/ui/strings/app_locale_settings_en-US.pak",
+    "$root_gen_dir/ui/strings/ui_strings_en-US.pak",
+    "$root_gen_dir/wings/web/wings_web_resources.pak",
+  ]
+
+  deps = [
+    ":resources",
+    "//wings/web:wings_web_resources",
+    "//content:resources",
+    "//content/app/resources",
+    "//content/app/strings",
+    "//content/browser/tracing:resources",
+    "//mojo/public/js:resources",
+    "//net:net_resources",
+    "//third_party/WebKit/public:resources",
+    "//third_party/WebKit/public:scaled_resources_100_percent",
+    "//ui/resources",
+    "//ui/strings",
+  ]
+
+  if (toolkit_views) {
+    deps += [ "//ui/views/resources" ]
+    sources +=
+        [ "$root_gen_dir/ui/views/resources/views_resources_100_percent.pak" ]
+  }
+  if (!is_android) {
+    sources +=
+        [ "$root_gen_dir/content/browser/devtools/devtools_resources.pak" ]
+    deps += [ "//content/browser/devtools:resources" ]
+  }
+  output = "$root_out_dir/wings.pak"
+}
