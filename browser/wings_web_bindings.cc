@@ -110,7 +110,7 @@ void WingsWebBindings::AgentHostClosed(content::DevToolsAgentHost* agent_host) {
 
 void WingsWebBindings::DispatchProtocolMessage(content::DevToolsAgentHost* agent_host,
                              const std::string& message) {
-  LOG(INFO) << "DispatchProtocolMessage " << message;
+  // LOG(INFO) << "DispatchProtocolMessage " << message;
   if (message.length() < kMaxMessageChunkSize) {
     std::string param;
     base::EscapeJSONString(message, true, &param);

@@ -1,4 +1,4 @@
-const Protocol = {}
+import Protocol from './index'
 
 Protocol.Error = Symbol('Protocol.Error');
 
@@ -654,8 +654,3 @@ Protocol.InspectorBackend.Options = {
 };
 
 Protocol.InspectorBackend._timeLogger = console.context ? console.context('Protocol timing') : console;
-
-export const Error = Protocol.Error
-export const InspectorBackend = Protocol.InspectorBackend
-export const inspectorBackend = Protocol.inspectorBackend
-export const TargetBase = Protocol.TargetBase

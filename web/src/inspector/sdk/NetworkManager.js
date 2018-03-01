@@ -1250,8 +1250,6 @@ SDK.MultitargetNetworkManager.RequestInterceptor;
  */
 SDK.multitargetNetworkManager;
 
-module.exports = {
-  NetworkManager: SDK.NetworkManager,
-  NetworkDispatcher: SDK.NetworkDispatcher,
-  MultitargetNetworkManager: SDK.MultitargetNetworkManager
-}
+export const NetworkManager = SDK.NetworkManager
+export const NetworkDispatcher = SDK.NetworkDispatcher
+export const MultitargetNetworkManager = SDK.MultitargetNetworkManager

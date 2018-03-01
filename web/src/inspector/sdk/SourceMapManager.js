@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import Multimap from 'multimap'
 import Common from '@/inspector/common'
 import * as Target from './Target'
 
@@ -256,6 +257,4 @@ SDK.SourceMapManager.Events = {
   SourceMapChanged: Symbol('SourceMapChanged')
 };
 
-module.exports = {
-  SourceMapManager: SDK.SourceMapManager
-}
+export const SourceMapManager = SDK.SourceMapManager

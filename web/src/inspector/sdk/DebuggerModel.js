@@ -3,8 +3,9 @@ import Common from '@/inspector/common'
 import * as Target from './Target'
 import * as RuntimeModel from './RuntimeModel'
 import * as SourceMapManager from './SourceMapManager'
+import * as Script from './Script'
 
-const SDK = _.assign({}, Target, RuntimeModel, SourceMapManager)
+const SDK = _.assign({}, Target, RuntimeModel, SourceMapManager, Script)
 
 /**
  * @unrestricted
@@ -38,18 +39,18 @@ SDK.DebuggerModel = class extends SDK.SDKModel {
     this._breakpointResolvedEventTarget = new Common.Object();
 
     this._isPausing = false;
-    Common.moduleSetting('pauseOnExceptionEnabled').addChangeListener(this._pauseOnExceptionStateChanged, this);
-    Common.moduleSetting('pauseOnCaughtException').addChangeListener(this._pauseOnExceptionStateChanged, this);
-    Common.moduleSetting('disableAsyncStackTraces').addChangeListener(this._asyncStackTracesStateChanged, this);
+    // Common.moduleSetting('pauseOnExceptionEnabled').addChangeListener(this._pauseOnExceptionStateChanged, this);
+    // Common.moduleSetting('pauseOnCaughtException').addChangeListener(this._pauseOnExceptionStateChanged, this);
+    // Common.moduleSetting('disableAsyncStackTraces').addChangeListener(this._asyncStackTracesStateChanged, this);
 
     if (!target.suspended())
       this._enableDebugger();
 
     /** @type {!Map<string, string>} */
     this._stringMap = new Map();
-    this._sourceMapManager.setEnabled(Common.moduleSetting('jsSourceMapsEnabled').get());
-    Common.moduleSetting('jsSourceMapsEnabled')
-        .addChangeListener(event => this._sourceMapManager.setEnabled(/** @type {boolean} */ (event.data)));
+    // this._sourceMapManager.setEnabled(Common.moduleSetting('jsSourceMapsEnabled').get());
+    // Common.moduleSetting('jsSourceMapsEnabled')
+    //     .addChangeListener(event => this._sourceMapManager.setEnabled(/** @type {boolean} */ (event.data)));
   }
 
   /**
@@ -162,20 +163,21 @@ SDK.DebuggerModel = class extends SDK.SDKModel {
 
   _pauseOnExceptionStateChanged() {
     var state;
-    if (!Common.moduleSetting('pauseOnExceptionEnabled').get())
+    // if (!Common.moduleSetting('pauseOnExceptionEnabled').get())
       state = SDK.DebuggerModel.PauseOnExceptionsState.DontPauseOnExceptions;
-    else if (Common.moduleSetting('pauseOnCaughtException').get())
-      state = SDK.DebuggerModel.PauseOnExceptionsState.PauseOnAllExceptions;
-    else
-      state = SDK.DebuggerModel.PauseOnExceptionsState.PauseOnUncaughtExceptions;
+    // else if (Common.moduleSetting('pauseOnCaughtException').get())
+    //   state = SDK.DebuggerModel.PauseOnExceptionsState.PauseOnAllExceptions;
+    // else
+    //   state = SDK.DebuggerModel.PauseOnExceptionsState.PauseOnUncaughtExceptions;
 
     this._agent.setPauseOnExceptions(state);
   }
 
   _asyncStackTracesStateChanged() {
     const maxAsyncStackChainDepth = 32;
-    var enabled = !Common.moduleSetting('disableAsyncStackTraces').get() && this._debuggerEnabled;
-    this._agent.setAsyncCallStackDepth(enabled ? maxAsyncStackChainDepth : 0);
+    // var enabled = !Common.moduleSetting('disableAsyncStackTraces').get() && this._debuggerEnabled;
+    // this._agent.setAsyncCallStackDepth(enabled ? maxAsyncStackChainDepth : 0);
+    this._agent.setAsyncCallStackDepth(0);
   }
 
   stepInto() {
@@ -880,7 +882,7 @@ SDK.DebuggerModel._scheduledPauseOnAsyncCall = null;
 /** @type {!Map<string, string>} */
 SDK.DebuggerModel._fileURLToNodeJSPath = new Map();
 
-// SDK.SDKModel.register(SDK.DebuggerModel, SDK.Target.Capability.JS, true);
+SDK.SDKModel.register(SDK.DebuggerModel, SDK.Target.Capability.JS, true);
 
 /** @typedef {{location: ?SDK.DebuggerModel.Location, functionName: string}} */
 SDK.DebuggerModel.FunctionDetails;
@@ -1470,8 +1472,6 @@ SDK.DebuggerPausedDetails = class {
   }
 };
 
-module.exports = {
-  DebuggerModel: SDK.DebuggerModel,
-  DebuggerDispatcher: SDK.DebuggerDispatcher,
-  DebuggerPausedDetails: SDK.DebuggerPausedDetails
-}
+export const DebuggerModel = SDK.DebuggerModel
+export const DebuggerDispatcher = SDK.DebuggerDispatcher
+export const DebuggerPausedDetails = SDK.DebuggerPausedDetails

@@ -12,13 +12,11 @@
 
 namespace wings {
 
-namespace {
-static GURL GetFrontendURL() {
+GURL GetFrontendURL() {
   int port = WingsWebManager::GetHttpHandlerPort();
   return GURL(
       base::StringPrintf("http://127.0.0.1:%d/wings/index.html", port));
 }
-}  // namespace
 
 WingsWebFrontend::WingsWebFrontend(Wings* frontend_wings, content::WebContents* inspected_contents)
   : content::WebContentsObserver(frontend_wings->web_contents()),

@@ -145,7 +145,7 @@ Common.EventTarget.prototype = {
 // export const CommonObject = Common.Object
 // export const EventTarget = Common.EventTarget
 
-module.exports = {
+export default {
   Object: Common.Object,
   EventTarget: Common.EventTarget
 }

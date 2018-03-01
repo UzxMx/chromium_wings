@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import * as CommonObject from './Object'
+import CommonObject from './Object'
 import { InspectorFrontendHost } from '@/inspector/host/devtools_compatibility'
 
 const Common = _.assign({}, CommonObject)
@@ -836,17 +836,15 @@ Common.settingForTest = function(settingName) {
   return Common.settings.settingForTest(settingName);
 };
 
-module.exports = {
-  Settings: Common.Settings,
-  SettingsStorage: Common.SettingsStorage,
-  Setting: Common.Setting,
-  RegExpSetting: Common.RegExpSetting,
-  VersionController: Common.VersionController,
-  SettingStorageType: Common.SettingStorageType,
-  moduleSetting: Common.moduleSetting,
-  settingForTest: Common.settingForTest,
-  settings: Common.settings
-};
+export const Settings = Common.Settings
+export const SettingsStorage = Common.SettingsStorage
+export const Setting = Common.Setting
+export const RegExpSetting = Common.RegExpSetting
+export const VersionController = Common.VersionController
+export const SettingStorageType = Common.SettingStorageType
+export const moduleSetting = Common.moduleSetting
+export const settingForTest = Common.settingForTest
+export const settings = Common.settings
 
 {
   var storagePrefix = '__custom__';

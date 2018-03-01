@@ -65,6 +65,4 @@ SDK.SecurityOriginManager.Events = {
   MainSecurityOriginChanged: Symbol('MainSecurityOriginChanged')
 };
 
-module.exports = {
-  SecurityOriginManager: SDK.SecurityOriginManager
-}
+export const SecurityOriginManager = SDK.SecurityOriginManager

@@ -1,7 +1,5 @@
-import * as InspectorBackend from './InspectorBackend'
+const Protocol = {}
+export default Protocol
 
+require('./InspectorBackend')
 require('./commands')
-
-export default {
-  ...InspectorBackend
-}

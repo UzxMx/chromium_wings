@@ -16,7 +16,7 @@ namespace {
 static GURL GetFrontendURL() {
   int port = WingsDevToolsManagerDelegate::GetHttpHandlerPort();
   return GURL(
-      base::StringPrintf("http://127.0.0.1:%d/devtools/inspector.html", port));
+      base::StringPrintf("http://127.0.0.1:%d/devtools/inspector.html?can_dock=true", port));
 }
 }  // namespace
 

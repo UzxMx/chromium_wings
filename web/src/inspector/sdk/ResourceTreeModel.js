@@ -3,8 +3,9 @@ import Common from '@/inspector/common'
 import * as Target from './Target'
 import * as SecurityOriginManager from './SecurityOriginManager'
 import * as NetworkManager from './NetworkManager'
+import * as RuntimeModel from './RuntimeModel'
 
-const SDK = _.assign({}, Target, SecurityOriginManager, NetworkManager)
+const SDK = _.assign({}, Target, SecurityOriginManager, NetworkManager, RuntimeModel)
 
 SDK.ResourceTreeModel = class extends SDK.SDKModel {
   /**
@@ -882,8 +883,6 @@ SDK.PageDispatcher = class {
   }
 };
 
-module.exports = {
-  ResourceTreeModel: SDK.ResourceTreeModel,
-  ResourceTreeFrame: SDK.ResourceTreeFrame,
-  PageDispatcher: SDK.PageDispatcher
-}
+export const ResourceTreeModel = SDK.ResourceTreeModel
+export const ResourceTreeFrame = SDK.ResourceTreeFrame
+export const PageDispatcher = SDK.PageDispatcher

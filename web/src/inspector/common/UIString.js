@@ -9,6 +9,4 @@ Common.UIString = function(string, vararg) {
   return string;
 };
 
-module.exports = {
-  UIString: Common.UIString
-}
+export const UIString = Common.UIString

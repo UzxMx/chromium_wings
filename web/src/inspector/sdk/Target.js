@@ -160,7 +160,7 @@ SDK.Target = class extends Protocol.TargetBase {
     if (!this._modelByConstructor.get(modelClass)) {
       var info = SDK.SDKModel._registeredModels.get(modelClass);
       if (info === undefined)
-        throw new Error('Model class is not registered');
+        throw new Error('Model class is not registered. ' + modelClass);
       if ((this._capabilitiesMask & info.capabilities) === info.capabilities) {
         var model = new modelClass(this);
         this._modelByConstructor.set(modelClass, model);
@@ -968,15 +968,14 @@ SDK.SDKModelObserver.prototype = {
  */
 SDK.targetManager = new SDK.TargetManager();
 
-module.exports = {
-  Target: SDK.Target,
-  SDKModel: SDK.SDKModel,
-  TargetManager: SDK.TargetManager,
-  ChildTargetManager: SDK.ChildTargetManager,
-  ChildConnection: SDK.ChildConnection,
-  SDKModelObserver: SDK.SDKModelObserver,
-  targetManager: SDK.targetManager  
-}
+
+export const Target = SDK.Target
+export const SDKModel = SDK.SDKModel
+export const TargetManager = SDK.TargetManager
+export const ChildTargetManager = SDK.ChildTargetManager
+export const ChildConnection = SDK.ChildConnection
+export const SDKModelObserver = SDK.SDKModelObserver
+export const targetManager = SDK.targetManager
 
 // circlar dependency walkround
 const ResourceTreeModel = require('./ResourceTreeModel')

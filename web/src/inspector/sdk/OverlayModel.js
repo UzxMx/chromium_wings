@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import Common from '@/inspector/common'
+import Protocol from '@/inspector/protocol'
 import * as Target from './Target'
 import * as DOMModel from './DOMModel'
 import * as DebuggerModel from './DOMModel'
@@ -196,7 +197,8 @@ SDK.OverlayModel = class extends SDK.SDKModel {
    */
   _buildHighlightConfig(mode) {
     mode = mode || 'all';
-    var showRulers = Common.moduleSetting('showMetricsRulers').get();
+    // var showRulers = Common.moduleSetting('showMetricsRulers').get();
+    var showRulers = false;
     var highlightConfig = {showInfo: mode === 'all', showRulers: showRulers, showExtensionLines: showRulers};
     if (mode === 'all' || mode === 'content')
       highlightConfig.contentColor = Common.Color.PageHighlight.Content.toProtocolRGBA();
@@ -336,6 +338,4 @@ SDK.OverlayModel.DefaultHighlighter = class {
   }
 };
 
-module.exports = {
-  OverlayModel: SDK.OverlayModel
-}
+export const OverlayModel = SDK.OverlayModel

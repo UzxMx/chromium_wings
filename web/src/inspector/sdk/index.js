@@ -8,6 +8,8 @@ import * as RuntimeModel from './RuntimeModel'
 import * as DebuggerModel from './DebuggerModel'
 import * as OverlayModel from './OverlayModel'
 import * as SourceMapManager from './SourceMapManager'
+import * as Script from './Script'
+import * as RemoteObject from './RemoteObject'
 
 export default {
   ...Target,
@@ -19,5 +21,7 @@ export default {
   ...RuntimeModel,
   ...DebuggerModel,
   ...OverlayModel,
-  ...SourceMapManager
+  ...SourceMapManager,
+  ...Script,
+  ...RemoteObject
 }

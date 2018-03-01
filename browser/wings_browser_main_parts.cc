@@ -3,6 +3,7 @@
 #include "wings/browser/wings_browser_context.h"
 #include "wings/browser/wings_devtools_manager_delegate.h"
 #include "wings/browser/wings_web_manager.h"
+#include "wings/browser/wings_web_frontend.h"
 
 #include "base/base_switches.h"
 #include "base/bind.h"
@@ -32,25 +33,25 @@ namespace wings {
 
 namespace {
 
-GURL GetStartupURL() {
-  base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
-  const base::CommandLine::StringVector& args = command_line->GetArgs();
+// GURL GetStartupURL() {
+//   base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
+//   const base::CommandLine::StringVector& args = command_line->GetArgs();
 
-#if defined(OS_ANDROID)
-  // Delay renderer creation on Android until surface is ready.
-  return GURL();
-#endif
+// #if defined(OS_ANDROID)
+//   // Delay renderer creation on Android until surface is ready.
+//   return GURL();
+// #endif
 
-  if (args.empty())
-    return GURL("https://www.baidu.com/");
+//   if (args.empty())
+//     return GURL("https://www.baidu.com/");
 
-  GURL url(args[0]);
-  if (url.is_valid() && url.has_scheme())
-    return url;
+//   GURL url(args[0]);
+//   if (url.is_valid() && url.has_scheme())
+//     return url;
 
-  return net::FilePathToFileURL(
-      base::MakeAbsoluteFilePath(base::FilePath(args[0])));
-}
+//   return net::FilePathToFileURL(
+//       base::MakeAbsoluteFilePath(base::FilePath(args[0])));
+// }
 
 } // namespace
 
@@ -99,7 +100,7 @@ void WingsBrowserMainParts::InitializeBrowserContexts() {
 
 void WingsBrowserMainParts::InitializeMessageLoopContext() {
   ui::MaterialDesignController::Initialize();
-  Wings::CreateNewWindow(browser_context_.get(), GetStartupURL(), nullptr,
+  Wings::CreateNewWindow(browser_context_.get(), GetFrontendURL(), nullptr,
                          gfx::Size());
 }
 

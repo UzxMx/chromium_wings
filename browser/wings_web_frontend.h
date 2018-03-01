@@ -13,6 +13,8 @@ class WebContents;
 
 namespace wings {
 
+GURL GetFrontendURL();
+
 class Wings;
 class WingsWebBindings;
 

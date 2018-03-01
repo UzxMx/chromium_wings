@@ -1,8 +1,9 @@
 import _ from 'lodash'
+import Runtime from '@/inspector/Runtime'
 import * as Target from './Target'
 import * as RuntimeModel from './RuntimeModel'
 
-const SDK = _.assign({}, Target, RuntimeModel)
+let SDK = _.assign({}, Target, RuntimeModel)
 
 /**
  * @unrestricted
@@ -1586,10 +1587,11 @@ SDK.DOMModel = class extends SDK.SDKModel {
    * @return {?SDK.DOMModel}
    */
   parentModel() {
-    if (!Runtime.experiments.isEnabled('oopifInlineDOM'))
-      return null;
-    var parentTarget = this.target().parentTarget();
-    return parentTarget ? parentTarget.model(SDK.DOMModel) : null;
+    return null;
+    // if (!Runtime.experiments.isEnabled('oopifInlineDOM'))
+    //   return null;
+    // var parentTarget = this.target().parentTarget();
+    // return parentTarget ? parentTarget.model(SDK.DOMModel) : null;
   }
 };
 
@@ -1827,13 +1829,14 @@ SDK.DOMModelUndoStack = class {
 
 SDK.domModelUndoStack = new SDK.DOMModelUndoStack();
 
-module.exports = {
-  DOMNode: SDK.DOMNode,
-  DeferredDOMNode: SDK.DeferredDOMNode,
-  DOMNodeShortcut: SDK.DOMNodeShortcut,
-  DOMDocument: SDK.DOMDocument,
-  DOMModel: SDK.DOMModel,
-  DOMDispatcher: SDK.DOMDispatcher,
-  DOMModelUndoStack: SDK.DOMModelUndoStack,
-  domModelUndoStack: SDK.domModelUndoStack
-}
+export const DOMNode = SDK.DOMNode
+export const DeferredDOMNode = SDK.DeferredDOMNode
+export const DOMNodeShortcut = SDK.DOMNodeShortcut
+export const DOMDocument = SDK.DOMDocument
+export const DOMModel = SDK.DOMModel
+export const DOMDispatcher = SDK.DOMDispatcher
+export const DOMModelUndoStack = SDK.DOMModelUndoStack
+export const domModelUndoStack = SDK.domModelUndoStack
+
+const OverlayModel = require('./OverlayModel')
+_.assign(SDK, OverlayModel)

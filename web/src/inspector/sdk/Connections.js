@@ -203,8 +203,6 @@ SDK.StubConnection = class {
   }
 };
 
-module.exports = {
-  MainConnection: SDK.MainConnection,
-  WebSocketConnection: SDK.WebSocketConnection,
-  StubConnection: SDK.StubConnection
-}
+export const MainConnection = SDK.MainConnection
+export const WebSocketConnection = SDK.WebSocketConnection
+export const StubConnection = SDK.StubConnection

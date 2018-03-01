@@ -1,9 +1,11 @@
 import _ from 'lodash'
+import Protocol from '@/inspector/protocol'
 import Runtime from '@/inspector/Runtime'
 import Common from '@/inspector/common'
 import * as Target from './Target'
+import * as RemoteObject from './RemoteObject'
 
-const SDK = _.assign({}, Target)
+let SDK = _.assign({}, Target, RemoteObject)
 
 /**
  * @unrestricted
@@ -746,9 +748,9 @@ SDK.ExecutionContext = class {
   }
 };
 
-module.exports = {
-  RuntimeModel: SDK.RuntimeModel,
-  RuntimeDispatcher: SDK.RuntimeDispatcher,
-  ExecutionContext: SDK.ExecutionContext
-}
+export const RuntimeModel = SDK.RuntimeModel
+export const RuntimeDispatcher = SDK.RuntimeDispatcher
+export const ExecutionContext = SDK.ExecutionContext
 
+const DebuggerModel = require('./DebuggerModel')
+_.assign(SDK, DebuggerModel)

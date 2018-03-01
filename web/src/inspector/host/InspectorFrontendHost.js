@@ -1,5 +1,5 @@
 import Runtime from '@/inspector/Runtime'
-import * as Common from '@/inspector/common/Object'
+import Common from '@/inspector/common/Object'
 import { InspectorFrontendHost } from './devtools_compatibility'
 import InspectorFrontendHostAPI from './InspectorFrontendHostAPI'
 
@@ -542,7 +542,5 @@ Host.isUnderTest = function(prefs) {
   return Common.settings && Common.settings.createSetting('isUnderTest', false).get();
 };
 
-module.exports = {
-  InspectorFrontendHostStub: Host.InspectorFrontendHostStub,
-  isUnderTest: Host.isUnderTest
-}
+export const InspectorFrontendHostStub = Host.InspectorFrontendHostStub
+export const isUnderTest = Host.isUnderTest
