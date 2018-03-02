@@ -53,7 +53,8 @@ void WingsWebFrontend::Close() {
 }
 
 void WingsWebFrontend::DocumentAvailableInMainFrame() {
-  bindings_->Attach();
+  // TODO comment for now
+  // bindings_->Attach();
 }
 
 void WingsWebFrontend::WebContentsDestroyed() {

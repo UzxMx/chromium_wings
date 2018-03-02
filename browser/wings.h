@@ -33,6 +33,14 @@ public:
   // Do one time initialization at application startup.
   static void Initialize();
 
+  static Wings* CreateMainWindow(
+      content::BrowserContext* browser_context,
+      const GURL& url,
+      const scoped_refptr<content::SiteInstance>& site_instance,
+      const gfx::Size& initial_size);
+
+  static Wings* GetMainWindow();
+
   static Wings* CreateNewWindow(
       content::BrowserContext* browser_context,
       const GURL& url,
@@ -46,6 +54,8 @@ public:
 #endif  
 
   static gfx::Size GetWingsDefaultSize();
+
+  content::WebContents* CreatePreviewerContents();
 
 private:
   enum UIControl {
@@ -85,8 +95,10 @@ private:
   void PlatformSetIsLoading(bool loading);
   // Set the title of wings window
   void PlatformSetTitle(const base::string16& title);      
+  void PlatformSetPreviewerContents();
   
   std::unique_ptr<content::WebContents> web_contents_;
+  std::unique_ptr<content::WebContents> previewer_web_contents_;
 
   gfx::NativeWindow window_;
 #if defined(OS_MACOSX)

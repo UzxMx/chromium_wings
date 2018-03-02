@@ -83,8 +83,8 @@ const CGFloat kButtonWidth = 72;
 const CGFloat kURLBarHeight = 24;
 
 // The minimum size of the window's content (in view coordinates)
-const CGFloat kMinimumWindowWidth = 400;
-const CGFloat kMinimumWindowHeight = 300;
+// const CGFloat kMinimumWindowWidth = 400;
+// const CGFloat kMinimumWindowHeight = 300;
 
 void MakeWingsButton(NSRect* rect,
                      NSString* title,
@@ -118,14 +118,15 @@ void Wings::PlatformCleanUp() {
 }
 
 void Wings::PlatformCreateWindow(int width, int height) {
-  height += kURLBarHeight;
-  NSRect initial_window_bounds = NSMakeRect(0, 0, width, height);
-  NSRect content_rect = initial_window_bounds;
+  // height += kURLBarHeight;
+  // NSRect initial_window_bounds = NSMakeRect(0, 0, width, height);
+  gfx::Size default_size = Wings::GetWingsDefaultSize();
+  NSRect initial_window_bounds = NSMakeRect(0, 0, default_size.width(), default_size.height());  
   NSUInteger style_mask = NSTitledWindowMask |
                           NSClosableWindowMask |
                           NSMiniaturizableWindowMask |
                           NSResizableWindowMask;
-  CrWingsWindow* window = [[CrWingsWindow alloc] initWithContentRect:content_rect
+  CrWingsWindow* window = [[CrWingsWindow alloc] initWithContentRect:initial_window_bounds
               styleMask:style_mask
                 backing:NSBackingStoreBuffered
                   defer:NO];
@@ -134,11 +135,11 @@ void Wings::PlatformCreateWindow(int width, int height) {
   [window_ setTitle:kWindowTitle];
   NSView* content = [window_ contentView];
 
-  // If the window is allowed to get too small, it will wreck the view bindings.
-  NSSize min_size = NSMakeSize(kMinimumWindowWidth, kMinimumWindowHeight);
-  min_size = [content convertSize:min_size toView:nil];
-  // Note that this takes window coordinates.
-  [window_ setContentMinSize:min_size]; 
+  // // If the window is allowed to get too small, it will wreck the view bindings.
+  // NSSize min_size = NSMakeSize(kMinimumWindowWidth, kMinimumWindowHeight);
+  // min_size = [content convertSize:min_size toView:nil];
+  // // Note that this takes window coordinates.target_display_provider_
+  // [window_ setContentMinSize:min_size];
 
   // Set the wings window to participate in Lion Fullscreen mode. Set
   // Setting this flag has no effect on Snow Leopard or earlier.
@@ -190,6 +191,8 @@ void Wings::PlatformSetContents() {
 
   NSRect frame = [content bounds];
   frame.size.height -= kURLBarHeight;
+  LOG(INFO) << "x: " << frame.origin.x << " y: " << frame.origin.y;
+  LOG(INFO) << "width: " << frame.size.width << " height: " << frame.size.height;
   [web_view setFrame:frame];
   [web_view setNeedsDisplay:YES];  
 }
@@ -212,6 +215,20 @@ void Wings::PlatformSetIsLoading(bool loading) {
 
 void Wings::PlatformSetTitle(const base::string16& title) {
   LOG(INFO) << "unimplemented";
+}
+
+void Wings::PlatformSetPreviewerContents() {
+  NSView* web_view = previewer_web_contents_->GetNativeView();
+  NSView* content = [window_ contentView];
+  [content addSubview:web_view];
+
+  NSRect frame = [content bounds];
+  frame.origin.x = 1080;
+  frame.origin.y = 0;
+  frame.size.width = 600;
+  frame.size.height -= kURLBarHeight;
+  [web_view setFrame:frame];
+  [web_view setNeedsDisplay:YES];
 }
 
 void Wings::ActionPerformed(int control) {

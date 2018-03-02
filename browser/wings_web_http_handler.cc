@@ -1,6 +1,8 @@
 #include "wings/browser/wings_web_http_handler.h"
+#include "wings/browser/wings.h"
 #include "wings/browser/wings_web_socket_factory.h"
 #include "wings/browser/wings_web_frontend_host.h"
+#include "wings/browser/wings_web_frontend.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -28,6 +30,7 @@
 #include "content/browser/devtools/devtools_http_handler.h"
 #include "content/browser/devtools/devtools_manager.h"
 #include "content/browser/devtools/grit/devtools_resources.h"
+#include "content/public/browser/browser_context.h"
 #include "content/public/browser/browser_thread.h"
 #include "content/public/browser/devtools_external_agent_proxy_delegate.h"
 #include "content/public/browser/devtools_manager_delegate.h"
@@ -284,8 +287,9 @@ void StartServerOnHandlerThread(
                      std::move(ip_address)));  
 }
 
-WingsWebHttpHandler::WingsWebHttpHandler(std::unique_ptr<WingsWebSocketFactory> server_socket_factory)
-  : weak_factory_(this) {
+WingsWebHttpHandler::WingsWebHttpHandler(content::BrowserContext* browser_context, std::unique_ptr<WingsWebSocketFactory> server_socket_factory)
+  : browser_context_(browser_context),
+    weak_factory_(this) {
   std::unique_ptr<base::Thread> thread(
       new base::Thread(kWingsWebHandlerThreadName));
   base::Thread::Options options;
@@ -311,7 +315,12 @@ void WingsWebHttpHandler::ServerStarted(std::unique_ptr<base::Thread> thread,
   thread_ = std::move(thread);
   server_wrapper_ = std::move(server_wrapper);
   socket_factory_ = std::move(socket_factory);
-  server_ip_address_ = std::move(ip_address);  
+  server_ip_address_ = std::move(ip_address); 
+
+  Wings* wings = Wings::CreateMainWindow(browser_context_, GURL(), nullptr, gfx::Size());
+  // TODO memory may leak
+  new WingsWebFrontend(wings, nullptr);
+  wings->LoadURL(GetFrontendURL());
 }
 
 void WingsWebHttpHandler::OnFrontendResourceRequest(

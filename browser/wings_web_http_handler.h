@@ -11,6 +11,12 @@
 #include "content/public/browser/devtools_agent_host.h"
 #include "net/http/http_status_code.h"
 
+namespace content {
+
+class BrowserContext;
+
+}
+
 namespace base {
 class DictionaryValue;
 class Thread;
@@ -29,7 +35,7 @@ class ServerWrapper;
 
 class WingsWebHttpHandler {
 public:
-  WingsWebHttpHandler(std::unique_ptr<WingsWebSocketFactory> server_socket_factory);
+  WingsWebHttpHandler(content::BrowserContext* browser_context, std::unique_ptr<WingsWebSocketFactory> server_socket_factory);
   ~WingsWebHttpHandler();
 
   friend class ServerWrapper;
@@ -45,6 +51,7 @@ public:
                const std::string& mime_type);  
 
 private:
+  content::BrowserContext* browser_context_;
   std::unique_ptr<base::Thread> thread_;
   std::unique_ptr<ServerWrapper> server_wrapper_;
   std::unique_ptr<WingsWebSocketFactory> socket_factory_;

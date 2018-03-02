@@ -27,8 +27,12 @@
 #include "content/public/common/webrtc_ip_handling_policy.h"
 #include "media/media_features.h"
 #include "third_party/WebKit/public/web/WebPresentationReceiverFlags.h"
+#include "ui/display/display.h"
+#include "ui/display/screen.h"
 
 namespace wings {
+
+static Wings* main_window = nullptr;
 
 Wings::Wings(content::WebContents* web_contents)
     : content::WebContentsObserver(web_contents),
@@ -61,7 +65,6 @@ void Wings::LoadURL(const GURL& url) {
 }
 
 void Wings::LoadURLForFrame(const GURL& url, const std::string& frame_name) {
-  LOG(INFO) << url.GetContent();
   content::NavigationController::LoadURLParams params(url);
   params.transition_type = ui::PageTransitionFromInt(
       ui::PAGE_TRANSITION_TYPED | ui::PAGE_TRANSITION_FROM_ADDRESS_BAR);
@@ -75,7 +78,12 @@ gfx::Size Wings::GetWingsDefaultSize() {
   if (!default_shell_size.IsEmpty())
     return default_shell_size;
 
-  default_shell_size = gfx::Size(800, 600);
+  // Reference chrome/browser/ui/window_sizer.cc
+  display::Screen* screen = display::Screen::GetScreen();
+  display::Display display = screen->GetPrimaryDisplay();
+  gfx::Rect work_area = display.work_area();
+  default_shell_size = gfx::Size(work_area.width(), work_area.height());
+
   return default_shell_size;
 }
 
@@ -87,6 +95,18 @@ gfx::Size Wings::AdjustWindowSize(const gfx::Size& initial_size) {
 
 void Wings::Initialize() {
   PlatformInitialize(GetWingsDefaultSize());
+}
+
+Wings* Wings::CreateMainWindow(content::BrowserContext* browser_context,
+                              const GURL& url,
+                              const scoped_refptr<content::SiteInstance>& site_instance,
+                              const gfx::Size& initial_size) {
+  main_window = CreateNewWindow(browser_context, url, site_instance, initial_size);
+  return main_window;
+}
+
+Wings* Wings::GetMainWindow() {
+  return main_window;
 }
 
 Wings* Wings::CreateNewWindow(content::BrowserContext* browser_context,
@@ -115,6 +135,22 @@ Wings* Wings::CreateWings(content::WebContents* web_contents,
 
 void Wings::ShowDevTools() {
   LOG(INFO) << "unimplemented";
+}
+
+content::WebContents* Wings::CreatePreviewerContents() {
+  content::WebContents::CreateParams create_params(web_contents_->GetBrowserContext(), nullptr);
+  create_params.initial_size = gfx::Size();
+  previewer_web_contents_.reset(content::WebContents::Create(create_params));
+  previewer_web_contents_->SetDelegate(this);  
+  PlatformSetPreviewerContents();
+
+  content::NavigationController::LoadURLParams params(GURL("http://www.baidu.com"));
+  params.transition_type = ui::PageTransitionFromInt(
+      ui::PAGE_TRANSITION_TYPED | ui::PAGE_TRANSITION_FROM_ADDRESS_BAR);
+  previewer_web_contents_->GetController().LoadURLWithParams(params);
+  previewer_web_contents_->Focus();
+
+  return previewer_web_contents_.get();
 }
 
 } // namespace wings

@@ -1,5 +1,6 @@
 #include "wings/browser/wings_web_bindings.h"
 #include "wings/browser/wings_web_frontend_host.h"
+#include "wings/browser/wings.h"
 
 #include <stddef.h>
 
@@ -168,6 +169,9 @@ void WingsWebBindings::HandleMessageFromDevToolsFrontend(const std::string& mess
     if (!params->GetString(0, &name))
       return;
     preferences_.RemoveWithoutPathExpansion(name, nullptr);
+  } else if (method == "openPreviewer") {
+    Wings* wings = Wings::GetMainWindow();
+    wings->CreatePreviewerContents();
   } else {
     LOG(INFO) << "unimplemented method: " << method;
     return;

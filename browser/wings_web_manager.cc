@@ -58,7 +58,7 @@ std::unique_ptr<wings::WingsWebSocketFactory>CreateSocketFactory() {
 
 void WingsWebManager::StartHttpHandler(content::BrowserContext* browser_context) {
   WingsWebManager* manager = WingsWebManager::GetInstance();
-  manager->SetHttpHandler(std::make_unique<WingsWebHttpHandler>(CreateSocketFactory()));
+  manager->SetHttpHandler(std::make_unique<WingsWebHttpHandler>(browser_context, CreateSocketFactory()));
 }
 
 void WingsWebManager::StopHttpHandler() {

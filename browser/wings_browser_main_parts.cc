@@ -3,7 +3,6 @@
 #include "wings/browser/wings_browser_context.h"
 #include "wings/browser/wings_devtools_manager_delegate.h"
 #include "wings/browser/wings_web_manager.h"
-#include "wings/browser/wings_web_frontend.h"
 
 #include "base/base_switches.h"
 #include "base/bind.h"
@@ -100,8 +99,6 @@ void WingsBrowserMainParts::InitializeBrowserContexts() {
 
 void WingsBrowserMainParts::InitializeMessageLoopContext() {
   ui::MaterialDesignController::Initialize();
-  Wings::CreateNewWindow(browser_context_.get(), GetFrontendURL(), nullptr,
-                         gfx::Size());
 }
 
 } // namespace wings

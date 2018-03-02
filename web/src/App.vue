@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <button @click="openPreviewer">Open Previewer</button>
     <button @click="toggleInspect">{{ !inspecting ? 'Inspect' : 'Stop inspect' }}</button>
     <div v-if="node">
       <div>node type: {{ node.nodeType() }}</div>
@@ -14,6 +15,7 @@
 <script>
 import Protocol from '@/inspector/protocol'
 import SDK from '@/inspector/sdk'
+import Host from '@/inspector/host'
 import utils from '@/utils'
 
 export default {
@@ -25,6 +27,10 @@ export default {
   },
 
   methods: {
+    openPreviewer () {
+      Host.InspectorFrontendHost.openPreviewer()
+    },
+
     toggleInspect () {
       this.inspecting = !this.inspecting
       let mode = this.inspecting ? Protocol.Overlay.InspectMode.SearchForNode : Protocol.Overlay.InspectMode.None
@@ -62,5 +68,18 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
+  html, body {
+    width: 100%;
+    height: 100%;
+    border-right: 1px solid red;
+  }
+</style>
+
+<style lang="scss" scoped>
+  #app {
+    width: 100%;
+    height: 100%;
+    border-right: 1px solid #ddd;
+  }
 </style>
