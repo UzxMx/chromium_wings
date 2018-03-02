@@ -20,6 +20,8 @@ class GURL;
 
 namespace wings {
 
+class WingsWebFrontend;
+
 class Wings : public content::WebContentsDelegate,
               public content::WebContentsObserver {
 public:
@@ -55,6 +57,7 @@ public:
 
   static gfx::Size GetWingsDefaultSize();
 
+  void SetWebFrontend(WingsWebFrontend* web_frontend);
   content::WebContents* CreatePreviewerContents();
 
 private:
@@ -96,12 +99,19 @@ private:
   // Set the title of wings window
   void PlatformSetTitle(const base::string16& title);      
   void PlatformSetPreviewerContents();
+
+#if defined(OS_MACOSX)
+  void LayoutSubviews();
+#endif   
   
+  std::unique_ptr<WingsWebFrontend> web_frontend_;
   std::unique_ptr<content::WebContents> web_contents_;
   std::unique_ptr<content::WebContents> previewer_web_contents_;
 
   gfx::NativeWindow window_;
 #if defined(OS_MACOSX)
+  NSView* contents_container_view_;
+  NSView* previewer_container_view_;
   NSTextField* url_edit_view_;
 #endif  
 };

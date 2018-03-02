@@ -39,7 +39,7 @@ public:
                         content::WebContents* inspected_contents);
 
   void InspectElementAt(int x, int y);
-  virtual void Attach();
+  virtual void Attach(content::WebContents* inspected_contents);
 
   void CallClientFunction(const std::string& function_name,
                           const base::Value* arg1,

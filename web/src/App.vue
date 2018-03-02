@@ -13,6 +13,7 @@
 </template>
 
 <script>
+// TODO only show right border when previewer is shown.
 import Protocol from '@/inspector/protocol'
 import SDK from '@/inspector/sdk'
 import Host from '@/inspector/host'
@@ -69,17 +70,21 @@ export default {
 </script>
 
 <style lang="scss">
+  * {
+    box-sizing: border-box;
+  }
+
   html, body {
+    margin: 0;
+    padding: 0;
     width: 100%;
     height: 100%;
-    border-right: 1px solid red;
+  }
+
+  body {
+    border-right: 1px solid #ccc;
   }
 </style>
 
 <style lang="scss" scoped>
-  #app {
-    width: 100%;
-    height: 100%;
-    border-right: 1px solid #ddd;
-  }
 </style>

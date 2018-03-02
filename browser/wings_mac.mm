@@ -14,6 +14,8 @@
 #import "ui/base/cocoa/underlay_opengl_hosting_window.h"
 #include "url/gurl.h"
 
+gfx::Size window_size;
+
 // Receives notification that the window is closing so that it can start the
 // tear-down process. Is responsible for deleting itself when done.
 @interface WingsWindowDelegate : NSObject<NSWindowDelegate> {
@@ -79,33 +81,33 @@ namespace {
 NSString* kWindowTitle = @"Wings";
 
 // Layout constants (in view coordinates)
-const CGFloat kButtonWidth = 72;
+// const CGFloat kButtonWidth = 72;
 const CGFloat kURLBarHeight = 24;
 
 // The minimum size of the window's content (in view coordinates)
 // const CGFloat kMinimumWindowWidth = 400;
 // const CGFloat kMinimumWindowHeight = 300;
 
-void MakeWingsButton(NSRect* rect,
-                     NSString* title,
-                     NSView* parent,
-                     int control,
-                     NSView* target,
-                     NSString* key,
-                     NSUInteger modifier) {
-  base::scoped_nsobject<NSButton> button(
-      [[NSButton alloc] initWithFrame:*rect]);
-  [button setTitle:title];
-  [button setBezelStyle:NSSmallSquareBezelStyle];
-  [button setAutoresizingMask:(NSViewMaxXMargin | NSViewMinYMargin)];
-  [button setTarget:target];
-  [button setAction:@selector(performAction:)];
-  [button setTag:control];
-  [button setKeyEquivalent:key];
-  [button setKeyEquivalentModifierMask:modifier];
-  [parent addSubview:button];
-  rect->origin.x += kButtonWidth;
-}
+// void MakeWingsButton(NSRect* rect,
+//                      NSString* title,
+//                      NSView* parent,
+//                      int control,
+//                      NSView* target,
+//                      NSString* key,
+//                      NSUInteger modifier) {
+//   base::scoped_nsobject<NSButton> button(
+//       [[NSButton alloc] initWithFrame:*rect]);
+//   [button setTitle:title];
+//   [button setBezelStyle:NSSmallSquareBezelStyle];
+//   [button setAutoresizingMask:(NSViewMaxXMargin | NSViewMinYMargin)];
+//   [button setTarget:target];
+//   [button setAction:@selector(performAction:)];
+//   [button setTag:control];
+//   [button setKeyEquivalent:key];
+//   [button setKeyEquivalentModifierMask:modifier];
+//   [parent addSubview:button];
+//   rect->origin.x += kButtonWidth;
+// }
 
 } // namespace
 
@@ -120,8 +122,8 @@ void Wings::PlatformCleanUp() {
 void Wings::PlatformCreateWindow(int width, int height) {
   // height += kURLBarHeight;
   // NSRect initial_window_bounds = NSMakeRect(0, 0, width, height);
-  gfx::Size default_size = Wings::GetWingsDefaultSize();
-  NSRect initial_window_bounds = NSMakeRect(0, 0, default_size.width(), default_size.height());  
+  window_size = Wings::GetWingsDefaultSize();
+  NSRect initial_window_bounds = NSMakeRect(0, 0, window_size.width(), window_size.height());  
   NSUInteger style_mask = NSTitledWindowMask |
                           NSClosableWindowMask |
                           NSMiniaturizableWindowMask |
@@ -156,23 +158,31 @@ void Wings::PlatformCreateWindow(int width, int height) {
   WingsWindowDelegate* delegate = [[WingsWindowDelegate alloc] initWithWings:this];
   [window_ setDelegate:delegate];
 
-  NSRect button_frame =
-      NSMakeRect(0, NSMaxY(initial_window_bounds) - kURLBarHeight,
-                 kButtonWidth, kURLBarHeight);
-  MakeWingsButton(&button_frame, @"Back", content, IDC_NAV_BACK,
-                  (NSView*)delegate, @"[", NSCommandKeyMask);
-  MakeWingsButton(&button_frame, @"Forward", content, IDC_NAV_FORWARD,
-                  (NSView*)delegate, @"]", NSCommandKeyMask);
-  MakeWingsButton(&button_frame, @"Reload", content, IDC_NAV_RELOAD,
-                  (NSView*)delegate, @"r", NSCommandKeyMask);
-  MakeWingsButton(&button_frame, @"Stop", content, IDC_NAV_STOP,
-                  (NSView*)delegate, @".", NSCommandKeyMask);
+  base::scoped_nsobject<NSView> contents_container_view([[NSView alloc] initWithFrame:[content bounds]]);
+  [contents_container_view setAutoresizingMask:(NSViewWidthSizable | NSViewHeightSizable)];
+  [content addSubview:contents_container_view];
+  contents_container_view_ = contents_container_view.get();
 
-  button_frame.size.width =
-      NSWidth(initial_window_bounds) - NSMinX(button_frame);
+  base::scoped_nsobject<NSView> previewer_container_view([[NSView alloc] init]);
+  [previewer_container_view setAutoresizingMask:(NSViewWidthSizable | NSViewHeightSizable)];
+  [content addSubview:previewer_container_view];
+  previewer_container_view_ = previewer_container_view.get();
+
+  // NSRect button_frame =
+  //     NSMakeRect(0, NSMaxY(initial_window_bounds) - kURLBarHeight,
+  //                kButtonWidth, kURLBarHeight);
+  // MakeWingsButton(&button_frame, @"Back", content, IDC_NAV_BACK,
+  //                 (NSView*)delegate, @"[", NSCommandKeyMask);
+  // MakeWingsButton(&button_frame, @"Forward", content, IDC_NAV_FORWARD,
+  //                 (NSView*)delegate, @"]", NSCommandKeyMask);
+  // MakeWingsButton(&button_frame, @"Reload", content, IDC_NAV_RELOAD,
+  //                 (NSView*)delegate, @"r", NSCommandKeyMask);
+  // MakeWingsButton(&button_frame, @"Stop", content, IDC_NAV_STOP,
+  //                 (NSView*)delegate, @".", NSCommandKeyMask);
+
   base::scoped_nsobject<NSTextField> url_edit_view(
-      [[NSTextField alloc] initWithFrame:button_frame]);
-  [content addSubview:url_edit_view];
+      [[NSTextField alloc] init]);
+  [previewer_container_view_ addSubview:url_edit_view];
   [url_edit_view setAutoresizingMask:(NSViewWidthSizable | NSViewMinYMargin)];
   [url_edit_view setTarget:delegate];
   [url_edit_view setAction:@selector(takeURLStringValueFrom:)];
@@ -186,11 +196,10 @@ void Wings::PlatformSetContents() {
   NSView* web_view = web_contents_->GetNativeView();
   [web_view setAutoresizingMask:(NSViewWidthSizable | NSViewHeightSizable)];
 
-  NSView* content = [window_ contentView];
-  [content addSubview:web_view];
+  [contents_container_view_ addSubview:web_view];
 
-  NSRect frame = [content bounds];
-  frame.size.height -= kURLBarHeight;
+  NSRect frame = [contents_container_view_ bounds];
+  // frame.size.height -= kURLBarHeight;
   LOG(INFO) << "x: " << frame.origin.x << " y: " << frame.origin.y;
   LOG(INFO) << "width: " << frame.size.width << " height: " << frame.size.height;
   [web_view setFrame:frame];
@@ -219,16 +228,34 @@ void Wings::PlatformSetTitle(const base::string16& title) {
 
 void Wings::PlatformSetPreviewerContents() {
   NSView* web_view = previewer_web_contents_->GetNativeView();
-  NSView* content = [window_ contentView];
-  [content addSubview:web_view];
+  [previewer_container_view_ addSubview:web_view];
 
-  NSRect frame = [content bounds];
-  frame.origin.x = 1080;
-  frame.origin.y = 0;
-  frame.size.width = 600;
-  frame.size.height -= kURLBarHeight;
-  [web_view setFrame:frame];
   [web_view setNeedsDisplay:YES];
+
+  LayoutSubviews();
+}
+
+void Wings::LayoutSubviews() {
+  NSView* content = [window_ contentView];
+  NSRect content_rect = [content bounds];
+
+  NSRect left_frame = NSMakeRect(0, 0, content_rect.size.width / 2, content_rect.size.height);
+  [contents_container_view_ setFrame:left_frame];
+  NSView* subview = [[contents_container_view_ subviews] objectAtIndex:0];
+  [subview setFrame:[contents_container_view_ bounds]];
+
+  NSRect right_frame = NSMakeRect(left_frame.size.width, 0, content_rect.size.width - left_frame.size.width, content_rect.size.height);
+  [previewer_container_view_ setFrame:right_frame];
+
+  NSRect bounds = [previewer_container_view_ bounds];
+  bounds.origin.y = bounds.size.height - kURLBarHeight;
+  bounds.size.height = kURLBarHeight;
+  [url_edit_view_ setFrame:bounds];
+
+  subview = [[previewer_container_view_ subviews] objectAtIndex:1];
+  bounds = [previewer_container_view_ bounds];
+  bounds.size.height = bounds.size.height - kURLBarHeight;
+  [subview setFrame:bounds];
 }
 
 void Wings::ActionPerformed(int control) {

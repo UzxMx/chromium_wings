@@ -69,7 +69,11 @@ void WingsWebBindings::InspectElementAt(int x, int y) {
   LOG(INFO) << "unimplemented";
 }
 
-void WingsWebBindings::Attach() {
+void WingsWebBindings::Attach(content::WebContents* inspected_contents) {
+  if (inspected_contents) {
+    inspected_contents_ = inspected_contents;
+  }
+
   if (agent_host_)
     agent_host_->DetachClient(this);
   agent_host_ = content::DevToolsAgentHost::GetOrCreateFor(inspected_contents_);

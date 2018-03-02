@@ -318,8 +318,6 @@ void WingsWebHttpHandler::ServerStarted(std::unique_ptr<base::Thread> thread,
   server_ip_address_ = std::move(ip_address); 
 
   Wings* wings = Wings::CreateMainWindow(browser_context_, GURL(), nullptr, gfx::Size());
-  // TODO memory may leak
-  new WingsWebFrontend(wings, nullptr);
   wings->LoadURL(GetFrontendURL());
 }
 

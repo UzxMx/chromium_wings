@@ -1,4 +1,5 @@
 #include "wings/browser/wings.h"
+#include "wings/browser/wings_web_frontend.h"
 
 #include <stddef.h>
 
@@ -102,6 +103,7 @@ Wings* Wings::CreateMainWindow(content::BrowserContext* browser_context,
                               const scoped_refptr<content::SiteInstance>& site_instance,
                               const gfx::Size& initial_size) {
   main_window = CreateNewWindow(browser_context, url, site_instance, initial_size);
+  main_window->SetWebFrontend(new WingsWebFrontend(main_window, nullptr));
   return main_window;
 }
 
@@ -150,7 +152,14 @@ content::WebContents* Wings::CreatePreviewerContents() {
   previewer_web_contents_->GetController().LoadURLWithParams(params);
   previewer_web_contents_->Focus();
 
+  // Attach previewer web contents to web bindings.
+  web_frontend_->AttachInspectedWebContents(previewer_web_contents_.get());
+
   return previewer_web_contents_.get();
+}
+
+void Wings::SetWebFrontend(WingsWebFrontend* web_frontend) {
+  web_frontend_.reset(web_frontend);
 }
 
 } // namespace wings

@@ -53,12 +53,15 @@ void WingsWebFrontend::Close() {
 }
 
 void WingsWebFrontend::DocumentAvailableInMainFrame() {
-  // TODO comment for now
   // bindings_->Attach();
 }
 
 void WingsWebFrontend::WebContentsDestroyed() {
   LOG(INFO) << "unimplemented";
+}
+
+void WingsWebFrontend::AttachInspectedWebContents(content::WebContents* inspected_contents) {
+  bindings_->Attach(inspected_contents);
 }
 
 } // namespace wings

@@ -21,6 +21,7 @@ class WingsWebBindings;
 class WingsWebFrontend : public content::WebContentsObserver {
  public:
   WingsWebFrontend(Wings* frontend_wings, content::WebContents* inspected_contents);
+  ~WingsWebFrontend() override;
   
   static WingsWebFrontend* Show(content::WebContents* inspected_contents);
 
@@ -29,6 +30,8 @@ class WingsWebFrontend : public content::WebContentsObserver {
   void InspectElementAt(int x, int y);
   void Close();
 
+  void AttachInspectedWebContents(content::WebContents* inspected_contents);
+
   Wings* frontend_wings() const { return frontend_wings_; }
 
  private:
@@ -36,7 +39,6 @@ class WingsWebFrontend : public content::WebContentsObserver {
   void DocumentAvailableInMainFrame() override;
   void WebContentsDestroyed() override;
 
-  ~WingsWebFrontend() override;
   Wings* frontend_wings_;
   std::unique_ptr<WingsWebBindings> bindings_;
 
