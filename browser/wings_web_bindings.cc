@@ -175,7 +175,12 @@ void WingsWebBindings::HandleMessageFromDevToolsFrontend(const std::string& mess
     preferences_.RemoveWithoutPathExpansion(name, nullptr);
   } else if (method == "openPreviewer") {
     Wings* wings = Wings::GetMainWindow();
-    wings->CreatePreviewerContents();
+    std::string url;
+    params->GetString(0, &url);
+    wings->OpenPreviewer(url);
+  } else if (method == "closePreviewer") {
+    Wings* wings = Wings::GetMainWindow();
+    wings->ClosePreviewer();
   } else {
     LOG(INFO) << "unimplemented method: " << method;
     return;

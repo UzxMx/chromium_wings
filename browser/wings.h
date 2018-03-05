@@ -60,6 +60,17 @@ public:
   void SetWebFrontend(WingsWebFrontend* web_frontend);
   content::WebContents* CreatePreviewerContents();
 
+  void OpenPreviewer(std::string& url_string);
+  void ClosePreviewer();
+
+  void GoBackOrForward(int offset);
+  void Reload();
+  void UpdateNavigationControls(bool to_different_document);
+  
+  void LoadingStateChanged(content::WebContents* source,
+                           bool to_different_document) override;  
+  void DidNavigateMainFramePostCommit(content::WebContents* web_contents) override;
+
 private:
   enum UIControl {
     BACK_BUTTON,
@@ -99,6 +110,7 @@ private:
   // Set the title of wings window
   void PlatformSetTitle(const base::string16& title);      
   void PlatformSetPreviewerContents();
+  void LoadURLForPreviewer(const GURL& url);
 
 #if defined(OS_MACOSX)
   void LayoutSubviews();

@@ -104,6 +104,7 @@ Wings* Wings::CreateMainWindow(content::BrowserContext* browser_context,
                               const gfx::Size& initial_size) {
   main_window = CreateNewWindow(browser_context, url, site_instance, initial_size);
   main_window->SetWebFrontend(new WingsWebFrontend(main_window, nullptr));
+  main_window->CreatePreviewerContents();
   return main_window;
 }
 
@@ -146,20 +147,55 @@ content::WebContents* Wings::CreatePreviewerContents() {
   previewer_web_contents_->SetDelegate(this);  
   PlatformSetPreviewerContents();
 
-  content::NavigationController::LoadURLParams params(GURL("http://www.baidu.com"));
-  params.transition_type = ui::PageTransitionFromInt(
-      ui::PAGE_TRANSITION_TYPED | ui::PAGE_TRANSITION_FROM_ADDRESS_BAR);
-  previewer_web_contents_->GetController().LoadURLWithParams(params);
-  previewer_web_contents_->Focus();
-
   // Attach previewer web contents to web bindings.
   web_frontend_->AttachInspectedWebContents(previewer_web_contents_.get());
 
   return previewer_web_contents_.get();
 }
 
+void Wings::LoadURLForPreviewer(const GURL& url) {
+  content::NavigationController::LoadURLParams params(url);
+  params.transition_type = ui::PageTransitionFromInt(
+      ui::PAGE_TRANSITION_TYPED | ui::PAGE_TRANSITION_FROM_ADDRESS_BAR);    
+  previewer_web_contents_->GetController().LoadURLWithParams(params);
+}
+
 void Wings::SetWebFrontend(WingsWebFrontend* web_frontend) {
   web_frontend_.reset(web_frontend);
+}
+
+void Wings::DidNavigateMainFramePostCommit(content::WebContents* web_contents) {
+  if (web_contents == previewer_web_contents_.get()) {
+    PlatformSetAddressBarURL(web_contents->GetLastCommittedURL());
+  }
+}
+
+void Wings::GoBackOrForward(int offset) {
+  previewer_web_contents_->GetController().GoToOffset(offset);
+  previewer_web_contents_->Focus();
+}
+
+void Wings::Reload() {
+  previewer_web_contents_->GetController().Reload(content::ReloadType::NORMAL, false);
+  previewer_web_contents_->Focus();
+}
+
+void Wings::UpdateNavigationControls(bool to_different_document) {
+  int current_index = previewer_web_contents_->GetController().GetCurrentEntryIndex();
+  int max_index = previewer_web_contents_->GetController().GetEntryCount() - 1;
+
+  PlatformEnableUIControl(BACK_BUTTON, current_index > 0);
+  PlatformEnableUIControl(FORWARD_BUTTON, current_index < max_index);
+  // PlatformEnableUIControl(STOP_BUTTON,
+  //     to_different_document && web_contents_->IsLoading());
+}
+
+void Wings::LoadingStateChanged(content::WebContents* source,
+                         bool to_different_document) {
+  if (source == previewer_web_contents_.get()) {
+    UpdateNavigationControls(to_different_document);
+    PlatformSetIsLoading(source->IsLoading());
+  }
 }
 
 } // namespace wings

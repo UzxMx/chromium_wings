@@ -81,33 +81,31 @@ namespace {
 NSString* kWindowTitle = @"Wings";
 
 // Layout constants (in view coordinates)
-// const CGFloat kButtonWidth = 72;
+const CGFloat kButtonWidth = 72;
 const CGFloat kURLBarHeight = 24;
 
 // The minimum size of the window's content (in view coordinates)
 // const CGFloat kMinimumWindowWidth = 400;
 // const CGFloat kMinimumWindowHeight = 300;
 
-// void MakeWingsButton(NSRect* rect,
-//                      NSString* title,
-//                      NSView* parent,
-//                      int control,
-//                      NSView* target,
-//                      NSString* key,
-//                      NSUInteger modifier) {
-//   base::scoped_nsobject<NSButton> button(
-//       [[NSButton alloc] initWithFrame:*rect]);
-//   [button setTitle:title];
-//   [button setBezelStyle:NSSmallSquareBezelStyle];
-//   [button setAutoresizingMask:(NSViewMaxXMargin | NSViewMinYMargin)];
-//   [button setTarget:target];
-//   [button setAction:@selector(performAction:)];
-//   [button setTag:control];
-//   [button setKeyEquivalent:key];
-//   [button setKeyEquivalentModifierMask:modifier];
-//   [parent addSubview:button];
-//   rect->origin.x += kButtonWidth;
-// }
+void MakeWingsButton(NSString* title,
+                     NSView* parent,
+                     int control,
+                     NSView* target,
+                     NSString* key,
+                     NSUInteger modifier) {
+  base::scoped_nsobject<NSButton> button(
+      [[NSButton alloc] init]);
+  [button setTitle:title];
+  [button setBezelStyle:NSSmallSquareBezelStyle];
+  [button setAutoresizingMask:(NSViewMaxXMargin | NSViewMinYMargin)];
+  [button setTarget:target];
+  [button setAction:@selector(performAction:)];
+  [button setTag:control];
+  [button setKeyEquivalent:key];
+  [button setKeyEquivalentModifierMask:modifier];
+  [parent addSubview:button];
+}
 
 } // namespace
 
@@ -167,22 +165,25 @@ void Wings::PlatformCreateWindow(int width, int height) {
   [previewer_container_view setAutoresizingMask:(NSViewWidthSizable | NSViewHeightSizable)];
   [content addSubview:previewer_container_view];
   previewer_container_view_ = previewer_container_view.get();
+  [previewer_container_view_ setNeedsDisplay:YES];
+  previewer_container_view_.hidden = YES;
 
-  // NSRect button_frame =
-  //     NSMakeRect(0, NSMaxY(initial_window_bounds) - kURLBarHeight,
-  //                kButtonWidth, kURLBarHeight);
-  // MakeWingsButton(&button_frame, @"Back", content, IDC_NAV_BACK,
-  //                 (NSView*)delegate, @"[", NSCommandKeyMask);
-  // MakeWingsButton(&button_frame, @"Forward", content, IDC_NAV_FORWARD,
-  //                 (NSView*)delegate, @"]", NSCommandKeyMask);
-  // MakeWingsButton(&button_frame, @"Reload", content, IDC_NAV_RELOAD,
-  //                 (NSView*)delegate, @"r", NSCommandKeyMask);
-  // MakeWingsButton(&button_frame, @"Stop", content, IDC_NAV_STOP,
-  //                 (NSView*)delegate, @".", NSCommandKeyMask);
+  base::scoped_nsobject<NSView> header_view([[NSView alloc] init]);
+  [header_view setAutoresizingMask:(NSViewWidthSizable | NSViewMinYMargin)];
+  [previewer_container_view_ addSubview:header_view];
+
+  MakeWingsButton(@"后退", header_view, IDC_NAV_BACK,
+                  (NSView*)delegate, @"[", NSCommandKeyMask);
+  MakeWingsButton(@"前进", header_view, IDC_NAV_FORWARD,
+                  (NSView*)delegate, @"]", NSCommandKeyMask);
+  MakeWingsButton(@"刷新", header_view, IDC_NAV_RELOAD,
+                  (NSView*)delegate, @"r", NSCommandKeyMask);
+  // // MakeWingsButton(&button_frame, @"Stop", content, IDC_NAV_STOP,
+  // //                 (NSView*)delegate, @".", NSCommandKeyMask);
 
   base::scoped_nsobject<NSTextField> url_edit_view(
       [[NSTextField alloc] init]);
-  [previewer_container_view_ addSubview:url_edit_view];
+  [header_view addSubview:url_edit_view];
   [url_edit_view setAutoresizingMask:(NSViewWidthSizable | NSViewMinYMargin)];
   [url_edit_view setTarget:delegate];
   [url_edit_view setAction:@selector(takeURLStringValueFrom:)];
@@ -199,9 +200,6 @@ void Wings::PlatformSetContents() {
   [contents_container_view_ addSubview:web_view];
 
   NSRect frame = [contents_container_view_ bounds];
-  // frame.size.height -= kURLBarHeight;
-  LOG(INFO) << "x: " << frame.origin.x << " y: " << frame.origin.y;
-  LOG(INFO) << "width: " << frame.size.width << " height: " << frame.size.height;
   [web_view setFrame:frame];
   [web_view setNeedsDisplay:YES];  
 }
@@ -211,11 +209,27 @@ void Wings::PlatformResizeSubViews() {
 }
 
 void Wings::PlatformEnableUIControl(UIControl control, bool is_enabled) {
-  LOG(INFO) << "unimplemented";
+  int id;
+  switch (control) {
+    case BACK_BUTTON:
+      id = IDC_NAV_BACK;
+      break;
+    case FORWARD_BUTTON:
+      id = IDC_NAV_FORWARD;
+      break;
+    case STOP_BUTTON:
+      id = IDC_NAV_STOP;
+      break;
+    default:
+      NOTREACHED() << "Unknown UI control";
+      return;
+  }
+  [[[window_ contentView] viewWithTag:id] setEnabled:is_enabled];
 }
 
 void Wings::PlatformSetAddressBarURL(const GURL& url) {
-  LOG(INFO) << "unimplemented"; 
+  NSString* url_string = base::SysUTF8ToNSString(url.spec());
+  [url_edit_view_ setStringValue:url_string];
 }
 
 void Wings::PlatformSetIsLoading(bool loading) {
@@ -239,27 +253,67 @@ void Wings::LayoutSubviews() {
   NSView* content = [window_ contentView];
   NSRect content_rect = [content bounds];
 
-  NSRect left_frame = NSMakeRect(0, 0, content_rect.size.width / 2, content_rect.size.height);
+  NSRect left_frame;
+  if (previewer_container_view_.hidden) {
+    left_frame = NSMakeRect(0, 0, content_rect.size.width, content_rect.size.height);
+  } else {
+    left_frame = NSMakeRect(0, 0, content_rect.size.width / 2, content_rect.size.height);
+  }
   [contents_container_view_ setFrame:left_frame];
   NSView* subview = [[contents_container_view_ subviews] objectAtIndex:0];
   [subview setFrame:[contents_container_view_ bounds]];
 
-  NSRect right_frame = NSMakeRect(left_frame.size.width, 0, content_rect.size.width - left_frame.size.width, content_rect.size.height);
-  [previewer_container_view_ setFrame:right_frame];
+  if (!previewer_container_view_.hidden) {
+    NSRect right_frame = NSMakeRect(left_frame.size.width, 0, content_rect.size.width - left_frame.size.width, content_rect.size.height);
+    [previewer_container_view_ setFrame:right_frame];
 
-  NSRect bounds = [previewer_container_view_ bounds];
-  bounds.origin.y = bounds.size.height - kURLBarHeight;
-  bounds.size.height = kURLBarHeight;
-  [url_edit_view_ setFrame:bounds];
+    NSRect bounds = [previewer_container_view_ bounds];
+    bounds.origin.y = bounds.size.height - kURLBarHeight;
+    bounds.size.height = kURLBarHeight;
+    NSView* header_view = [[previewer_container_view_ subviews] objectAtIndex:0];
+    [header_view setFrame:bounds];
+    NSRect button_frame =
+        NSMakeRect(0, 0, kButtonWidth, kURLBarHeight);
+    for (int i = 0; i < 3; i++) {
+      [[[header_view subviews] objectAtIndex:i] setFrame:button_frame];
+      button_frame.origin.x += kButtonWidth;      
+    }
+    button_frame.size.width = window_size.width() / 2 - button_frame.origin.x;
+    [[[header_view subviews] objectAtIndex:3] setFrame:button_frame];
 
-  subview = [[previewer_container_view_ subviews] objectAtIndex:1];
-  bounds = [previewer_container_view_ bounds];
-  bounds.size.height = bounds.size.height - kURLBarHeight;
-  [subview setFrame:bounds];
+    subview = [[previewer_container_view_ subviews] objectAtIndex:1];
+    bounds = [previewer_container_view_ bounds];
+    bounds.size.height = bounds.size.height - kURLBarHeight;
+    [subview setFrame:bounds];
+  }
+}
+
+void Wings::OpenPreviewer(std::string& url_string) {
+  previewer_container_view_.hidden = NO;
+  LayoutSubviews();
+  URLEntered(url_string);
+}
+
+void Wings::ClosePreviewer() {
+  previewer_container_view_.hidden = YES;
+  LayoutSubviews();
 }
 
 void Wings::ActionPerformed(int control) {
-  LOG(INFO) << "unimplemented";
+  switch (control) {
+    case IDC_NAV_BACK:
+      GoBackOrForward(-1);
+      break;
+    case IDC_NAV_FORWARD:
+      GoBackOrForward(1);
+      break;
+    case IDC_NAV_RELOAD:
+      Reload();
+      break;
+    // case IDC_NAV_STOP:
+    //   Stop();
+    //   break;
+  }
 }
 
 void Wings::URLEntered(const std::string& url_string) {
@@ -267,7 +321,7 @@ void Wings::URLEntered(const std::string& url_string) {
     GURL url(url_string);
     if (!url.has_scheme())
       url = GURL("http://" + url_string);
-    LoadURL(url);
+    LoadURLForPreviewer(url);
   }
 }
 

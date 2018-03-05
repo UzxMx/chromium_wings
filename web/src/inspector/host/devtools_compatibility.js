@@ -875,8 +875,12 @@ var InspectorFrontendHostImpl = class {
     this.recordEnumeratedHistogram('DevTools.PanelShown', panelCode, 20);
   }
 
-  openPreviewer() {
-    DevToolsAPI.sendMessageToEmbedder('openPreviewer', [], null);
+  openPreviewer(url) {
+    DevToolsAPI.sendMessageToEmbedder('openPreviewer', [url], null);
+  }
+
+  closePreviewer() {
+    DevToolsAPI.sendMessageToEmbedder('closePreviewer', [], null);
   }
 };
 

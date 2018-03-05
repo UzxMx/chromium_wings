@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <button @click="openPreviewer">Open Previewer</button>
+    <button v-if="!previewerOpened" @click="openPreviewer">Open Previewer</button>
+    <button v-else @click="closePreviewer">Close Previewer</button>
     <button @click="toggleInspect">{{ !inspecting ? 'Inspect' : 'Stop inspect' }}</button>
     <div v-if="node">
       <div>node type: {{ node.nodeType() }}</div>
@@ -23,13 +24,20 @@ export default {
   data () {
     return {
       inspecting: false,
-      node: null
+      node: null,
+      previewerOpened: false
     }
   },
 
   methods: {
     openPreviewer () {
-      Host.InspectorFrontendHost.openPreviewer()
+      this.previewerOpened = true
+      Host.InspectorFrontendHost.openPreviewer('http://www.thss.tsinghua.edu.cn/publish/soft/3647/index.html')
+    },
+
+    closePreviewer () {
+      this.previewerOpened = false
+      Host.InspectorFrontendHost.closePreviewer()
     },
 
     toggleInspect () {
