@@ -518,6 +518,28 @@ SDK.RemoteObjectImpl = class extends SDK.RemoteObject {
     this.doGetProperties(false, accessorPropertiesOnly, generatePreview, callback);
   }
 
+  getPropertyAsync(propertyPath) {
+    /**
+     * @param {string} arrayStr
+     * @suppressReceiverCheck
+     * @this {Object}
+     */
+    function remoteFunction(arrayStr) {
+      var result = this;
+      var properties = JSON.parse(arrayStr);
+      for (var i = 0, n = properties.length; i < n; ++i)
+        result = result[properties[i]];
+      return result;
+    }
+
+    var args = [{value: JSON.stringify(propertyPath)}];
+    return new Promise(resolve => {
+      this.callFunction(remoteFunction, args, result => {
+        resolve(result);
+      });
+    })
+  }
+
   /**
    * @override
    * @param {!Array.<string>} propertyPath

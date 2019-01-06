@@ -49,7 +49,9 @@ class TCPServerSocketFactory : public wings::WingsWebSocketFactory {
 };
 
 std::unique_ptr<wings::WingsWebSocketFactory>CreateSocketFactory() {
-  uint16_t port = 0;
+  // uint16_t port = 0;
+  // Speficy the port
+  uint16_t port = 37362;
   return std::unique_ptr<wings::WingsWebSocketFactory>(
       new TCPServerSocketFactory("127.0.0.1", port));
 }

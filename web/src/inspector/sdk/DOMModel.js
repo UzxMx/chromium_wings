@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import Runtime from '@/inspector/Runtime'
+import Protocol from '@/inspector/protocol'
 import * as Target from './Target'
 import * as RuntimeModel from './RuntimeModel'
 
@@ -472,6 +473,21 @@ SDK.DOMNode = class {
       callback(response[Protocol.Error] ? null : this.children());
     });
   }
+
+  /**
+   * @param {function(?Array<!SDK.DOMNode>)} callback
+   */
+  getChildNodesAsync() {
+    return new Promise(resolve => {
+      if (this._children) {
+        resolve(this.children());
+      } else {
+        this._agent.invoke_requestChildNodes({nodeId: this.id}).then(response => {
+          resolve(response[Protocol.Error] ? null : this.children())
+        });
+      }
+    })
+  }  
 
   /**
    * @param {number} depth

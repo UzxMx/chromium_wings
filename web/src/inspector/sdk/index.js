@@ -3,6 +3,7 @@ import * as Connections from './Connections'
 import * as DOMModel from './DOMModel'
 import * as ResourceTreeModel from './ResourceTreeModel'
 import * as SecurityOriginManager from './SecurityOriginManager'
+import * as NetworkRequest from './NetworkRequest'
 import * as NetworkManager from './NetworkManager'
 import * as RuntimeModel from './RuntimeModel'
 import * as DebuggerModel from './DebuggerModel'
@@ -17,6 +18,7 @@ export default {
   ...DOMModel,
   ...ResourceTreeModel,
   ...SecurityOriginManager,
+  ...NetworkRequest,
   ...NetworkManager,
   ...RuntimeModel,
   ...DebuggerModel,

@@ -1,9 +1,11 @@
 import _ from 'lodash'
+import Multimap from 'multimap'
 import Runtime from '@/inspector/Runtime'
 import Common from '@/inspector/common'
 import * as Target from './Target'
+import * as NetworkRequest from './NetworkRequest'
 
-const SDK = _.assign({}, Target)
+const SDK = _.assign({}, Target, NetworkRequest)
 
 /**
  * @unrestricted
@@ -826,6 +828,7 @@ SDK.MultitargetNetworkManager = class extends Common.Object {
 
     // TODO(allada) Remove these and merge it with request interception.
     // this._blockingEnabledSetting = Common.moduleSetting('requestBlockingEnabled');
+    this._blockingEnabled = false;
     // this._blockedPatternsSetting = Common.settings.createSetting('networkBlockedPatterns', []);
     this._effectiveBlockedURLs = [];
     this._updateBlockedPatterns();
@@ -989,7 +992,7 @@ SDK.MultitargetNetworkManager = class extends Common.Object {
    * @return {boolean}
    */
   blockingEnabled() {
-    return this._blockingEnabledSetting.get();
+    return this.blockingEnabled;
   }
 
   /**
@@ -1012,21 +1015,21 @@ SDK.MultitargetNetworkManager = class extends Common.Object {
    * @param {boolean} enabled
    */
   setBlockingEnabled(enabled) {
-    if (this._blockingEnabledSetting.get() === enabled)
-      return;
-    this._blockingEnabledSetting.set(enabled);
+    // if (this._blockingEnabledSetting.get() === enabled)
+    //   return;
+    // this._blockingEnabledSetting.set(enabled);
     this._updateBlockedPatterns();
     this.dispatchEventToListeners(SDK.MultitargetNetworkManager.Events.BlockedPatternsChanged);
   }
 
   _updateBlockedPatterns() {
     var urls = [];
-    if (this._blockingEnabledSetting.get()) {
-      for (var pattern of this._blockedPatternsSetting.get()) {
-        if (pattern.enabled)
-          urls.push(pattern.url);
-      }
-    }
+    // if (this._blockingEnabledSetting.get()) {
+    //   for (var pattern of this._blockedPatternsSetting.get()) {
+    //     if (pattern.enabled)
+    //       urls.push(pattern.url);
+    //   }
+    // }
 
     if (!urls.length && !this._effectiveBlockedURLs.length)
       return;
@@ -1249,6 +1252,8 @@ SDK.MultitargetNetworkManager.RequestInterceptor;
  * @type {!SDK.MultitargetNetworkManager}
  */
 SDK.multitargetNetworkManager;
+
+SDK.multitargetNetworkManager = new SDK.MultitargetNetworkManager();
 
 export const NetworkManager = SDK.NetworkManager
 export const NetworkDispatcher = SDK.NetworkDispatcher

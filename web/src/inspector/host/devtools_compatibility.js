@@ -39,7 +39,7 @@ var DevToolsAPIImpl = class {
     var message = {'id': callId, 'method': method};
     if (args.length)
       message.params = args;
-    console.log('message: ' + JSON.stringify(message));
+    // console.log('message: ' + JSON.stringify(message));
     DevToolsHost.sendMessageToEmbedder(JSON.stringify(message));
   }
 

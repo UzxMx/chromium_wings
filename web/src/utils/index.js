@@ -1,14 +1,14 @@
-function dumpAllProperties (o) {
-  var objectToInspect
-  var result = []
-  
-  for (objectToInspect = o; objectToInspect !== null; objectToInspect = Object.getPrototypeOf(objectToInspect)) {
-    result = result.concat(Object.getOwnPropertyNames(objectToInspect))
-  }
-
-  console.log(result)
-}
+import { dumpAllProperties } from './debug'
+import { getDOMModel, getXPath, getNodeByXPath } from './dom'
+import { findListNode, findNodeInList } from './list'
+import { findPage } from './page'
 
 export default {
-  dumpAllProperties
+  dumpAllProperties,
+  getDOMModel,
+  getXPath,
+  getNodeByXPath,
+  findListNode,
+  findNodeInList,
+  findPage
 }

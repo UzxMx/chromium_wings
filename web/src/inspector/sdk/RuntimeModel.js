@@ -743,8 +743,10 @@ SDK.ExecutionContext = class {
       this._label = this.name;
       return;
     }
-    var parsedUrl = this.origin.asParsedURL();
-    this._label = parsedUrl ? parsedUrl.lastPathComponentWithFragment() : '';
+    if (this.origin) {
+      var parsedUrl = this.origin.asParsedURL();
+      this._label = parsedUrl ? parsedUrl.lastPathComponentWithFragment() : '';
+    }
   }
 };
 

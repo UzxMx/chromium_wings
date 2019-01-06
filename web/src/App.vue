@@ -1,82 +1,28 @@
 <template>
-  <div id="app">
-    <button v-if="!previewerOpened" @click="openPreviewer">Open Previewer</button>
-    <button v-else @click="closePreviewer">Close Previewer</button>
-    <button @click="toggleInspect">{{ !inspecting ? 'Inspect' : 'Stop inspect' }}</button>
-    <div v-if="node">
-      <div>node type: {{ node.nodeType() }}</div>
-      <div>node name: {{ node.nodeName() }}</div>
-      <button @click="highlightNode">Highlight node</button>
-      <button @click="scrollIntoView">Scroll into view</button>
-      <button @click="highlight">Highlight</button>
-    </div>
+  <div class="root">
+    <with-menus v-if="isAuthenticated"></with-menus>
+    <router-view v-else></router-view>
   </div>
 </template>
 
 <script>
-// TODO only show right border when previewer is shown.
-import Protocol from '@/inspector/protocol'
-import SDK from '@/inspector/sdk'
-import Host from '@/inspector/host'
-import utils from '@/utils'
+import { mapGetters } from 'vuex'
+import WithMenus from '@/components/containers/WithMenus'
 
 export default {
-  data () {
-    return {
-      inspecting: false,
-      node: null,
-      previewerOpened: false
+  computed: mapGetters(['isAuthenticated']),
+
+  components: { WithMenus },
+
+  created () {
+    if (!this.isAuthenticated && this.$route.name !== 'Users.SignIn') {
+      this.$router.replace({ name: 'Users.SignIn' })
     }
-  },
-
-  methods: {
-    openPreviewer () {
-      this.previewerOpened = true
-      Host.InspectorFrontendHost.openPreviewer('http://www.thss.tsinghua.edu.cn/publish/soft/3647/index.html')
-    },
-
-    closePreviewer () {
-      this.previewerOpened = false
-      Host.InspectorFrontendHost.closePreviewer()
-    },
-
-    toggleInspect () {
-      this.inspecting = !this.inspecting
-      let mode = this.inspecting ? Protocol.Overlay.InspectMode.SearchForNode : Protocol.Overlay.InspectMode.None
-
-      for (var overlayModel of SDK.targetManager.models(SDK.OverlayModel)) {
-        overlayModel.setInspectMode(mode)
-      }
-    },
-
-    inspectNodeRequested (event) {
-      /** @type {!SDK.DeferredDOMNode} */
-      var deferredNode = event.data
-      deferredNode.resolve(node => {
-        this.node = node
-      })
-      this.toggleInspect()
-    },
-
-    highlightNode () {
-      this.node.highlightForTwoSeconds()
-    },
-
-    scrollIntoView () {
-      this.node.scrollIntoView()
-    },
-
-    highlight () {
-      this.node.highlight()
-    }
-  },
-
-  mounted () {
-    SDK.targetManager.addModelListener(SDK.OverlayModel, SDK.OverlayModel.Events.InspectNodeRequested, this.inspectNodeRequested, this)
   }
 }
 </script>
 
+<!-- TODO only show right border when previewer is shown. -->
 <style lang="scss">
   * {
     box-sizing: border-box;
@@ -92,7 +38,21 @@ export default {
   body {
     border-right: 1px solid #ccc;
   }
+
+  .fa-icon {
+    width: auto;
+    height: 1.5em; /* or any other relative font sizes */
+
+    /* You would have to include the following two lines to make this work in Safari */
+    max-width: 100%;
+    max-height: 100%;
+
+    color: #409EFF;
+  }  
 </style>
 
 <style lang="scss" scoped>
+  .root {
+    height: 100%;
+  }
 </style>
